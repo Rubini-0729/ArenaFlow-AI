@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ArenaFlow AI - FIFA World Cup 2026 Smart Stadium Platform</title>
+  <!-- SEO Meta Tags -->
+  <meta name="description" content="AI-enabled operations control center and fan assistant for smart stadiums during the FIFA World Cup 2026. Optimizes crowd management, transit, and sustainability.">
+  <meta name="keywords" content="FIFA World Cup 2026, Smart Stadium, Operations Dashboard, AI Assistant, Crowd Management, Accessibility, Transit, Sustainability">
+  
+  <!-- CSS Stylesheets -->
+  <link rel="stylesheet" href="css/variables.css">
+  <link rel="stylesheet" href="css/main.css">
+  <link rel="stylesheet" href="css/components.css">
+  <link rel="stylesheet" href="css/animations.css">
+</head>
+<body>
+
+  <!-- Global Announcement Broadcast Banner (AI-Triggered) -->
+  <div id="global-announcement-banner" class="animate-slide-down" style="display: none; background: var(--color-danger); color: white; padding: var(--spacing-sm) var(--spacing-lg); text-align: center; font-size: 0.95rem; font-weight: 700; z-index: 1000; position: fixed; top: 0; left: 0; width: 100%; box-shadow: var(--shadow-lg);">
+    ⚠️ BROADCAST: General announcement.
+  </div>
+
+  <div class="app-container">
+    
+    <!-- Sidebar Navigation -->
+    <nav class="sidebar" aria-label="Main Navigation">
+      <div class="sidebar-brand">
+        <div class="header-logo">
+          ⚽ <span>ArenaFlow AI</span>
+        </div>
+      </div>
+      
+      <ul class="sidebar-menu">
+        <li>
+          <a href="#" class="menu-item active" data-view="ops" id="nav-ops" aria-current="page">
+            📊 Operations Center
+          </a>
+        </li>
+        <li>
+          <a href="#" class="menu-item" data-view="fan" id="nav-fan">
+            👤 Fan Portal
+          </a>
+        </li>
+      </ul>
+      
+      <!-- Accessibility Control Panel inside Sidebar -->
+      <div class="sidebar-footer">
+        <p style="margin-bottom: var(--spacing-sm); font-weight: 600;">Accessibility Center</p>
+        <div style="display: flex; flex-direction: column; gap: var(--spacing-xs);">
+          <button class="btn btn-secondary" id="btn-contrast-toggle" aria-label="Toggle High Contrast Mode" style="font-size: 0.75rem; padding: 6px;">🌓 High Contrast</button>
+          <button class="btn btn-secondary" id="btn-text-size" aria-label="Change Text Size" style="font-size: 0.75rem; padding: 6px;">Text: Standard</button>
+        </div>
+        <p style="margin-top: var(--spacing-md); font-size: 0.7rem;">FIFA World Cup 2026™ Operations</p>
+      </div>
+    </nav>
+    
+    <!-- Main Window Workspace -->
+    <main class="main-content">
+      
+      <!-- Top Application Header -->
+      <header class="app-header">
+        <div>
+          <h2 style="font-size: 1.25rem;" id="stadium-header-title">MetLife Arena (NY/NJ) Operations Hub</h2>
+          <span style="font-size: 0.75rem; color: var(--color-text-secondary);">Telemetry Status: Live Sync</span>
+        </div>
+        <div class="header-status">
+          <div class="status-badge" role="status" aria-live="polite">
+            🟢 Active Operations
+          </div>
+        </div>
+      </header>
+      
+      <!-- Content Body -->
+      <div class="content-body">
+        
+        <!-- ============================================== -->
+        <!-- VIEW 1: OPERATIONS DASHBOARD (COMMAND CENTER) -->
+        <!-- ============================================== -->
+        <section class="dashboard-layout animate-fade-in" id="view-ops">
+          
+          <!-- Left Column: Interactive Map, Metrics, & Triggers -->
+          <div style="display: flex; flex-direction: column; gap: var(--spacing-lg); overflow-y: auto; padding-right: var(--spacing-sm);">
+            
+            <!-- Stadium Map Card -->
+            <div class="glass-panel" style="padding: var(--spacing-lg);">
+              <div class="card-header">
+                <h3 class="card-title">🗺️ Real-Time Stadium Layout & Flow</h3>
+                <span style="font-size: 0.75rem; color: var(--color-text-secondary);">Click objects to view telemetry</span>
+              </div>
+              
+              <div class="map-wrapper" aria-label="Interactive Stadium Map">
+                <svg id="stadium-svg" class="svg-map" xmlns="http://www.w3.org/2000/svg"></svg>
+              </div>
+              
+              <!-- Map Legend -->
+              <div style="display: flex; gap: var(--spacing-md); justify-content: center; font-size: 0.75rem; color: var(--color-text-secondary); margin-top: var(--spacing-sm);">
+                <span style="display: inline-flex; align-items: center; gap: 4px;"><span style="width: 8px; height: 8px; background: var(--color-brand-primary); border-radius: 50%;"></span> Gates</span>
+                <span style="display: inline-flex; align-items: center; gap: 4px;"><span style="width: 8px; height: 8px; background: var(--color-warning); border-radius: 2px;"></span> Concessions</span>
+                <span style="display: inline-flex; align-items: center; gap: 4px;"><span style="width: 8px; height: 8px; border-left: 5px solid transparent; border-right: 5px solid transparent; border-bottom: 8px solid var(--color-info);"></span> Restrooms</span>
+                <span style="display: inline-flex; align-items: center; gap: 4px;"><span style="width: 20px; height: 2px; border-top: 2px dashed var(--color-brand-primary);"></span> AI Route</span>
+              </div>
+            </div>
+
+            <!-- Incident Triggers Panel -->
+            <div class="glass-panel" style="padding: var(--spacing-lg);">
+              <div class="card-header">
+                <h3 class="card-title">⚠️ Simulate Operational Incidents</h3>
+              </div>
+              <div style="display: flex; flex-direction: column; gap: var(--spacing-md);">
+                <div style="display: flex; gap: var(--spacing-sm);">
+                  <select id="ops-incident-select" style="flex: 1;" aria-label="Select incident scenario to trigger">
+                    <option value="bottleneck_gate_a">Crowd Bottleneck at Gate A (East)</option>
+                    <option value="elevator_outage">Elevator Outage - North Stand Sec 202</option>
+                    <option value="severe_weather">Severe Weather Warning (Lightning Alert)</option>
+                    <option value="shuttle_delay">Transit Delay (Rideshare Hub B Shuttle)</option>
+                  </select>
+                  <button class="btn btn-primary" id="ops-trigger-incident">Trigger Incident</button>
+                </div>
+                <div style="border-top: 1px solid var(--color-border-glass); padding-top: var(--spacing-sm);">
+                  <p style="font-size: 0.8rem; color: var(--color-text-secondary); margin-bottom: var(--spacing-xs);">Report a custom incident to GenAI:</p>
+                  <div style="display: flex; gap: var(--spacing-sm);">
+                    <input type="text" id="ops-custom-report" placeholder="e.g. Broken water pipe in Section 105 Restroom..." style="flex: 1;" aria-label="Describe custom incident">
+                    <button class="btn btn-secondary" id="ops-trigger-custom">Send Report</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Gate Access & Scanning Rates -->
+            <div class="glass-panel" style="padding: var(--spacing-lg);">
+              <div class="card-header">
+                <h3 class="card-title">🎫 Gate Scanning Telemetry</h3>
+              </div>
+              <div id="gates-list">
+                <!-- Population by JS -->
+              </div>
+            </div>
+          </div>
+          
+          <!-- Right Column: AI Operational Decision Center & Sustainability -->
+          <div style="display: flex; flex-direction: column; gap: var(--spacing-lg); overflow-y: auto;">
+            
+            <!-- AI Operational Solver Response Panel -->
+            <div class="glass-panel glass-panel-glow" style="padding: var(--spacing-lg); border-color: rgba(0, 242, 254, 0.25);">
+              <div class="card-header">
+                <h3 class="card-title" style="color: var(--color-brand-primary);">🧠 GenAI Incident Command</h3>
+                <span class="status-badge" style="background: rgba(0, 242, 254, 0.1); border-color: rgba(0, 242, 254, 0.3); color: var(--color-brand-primary);">Active Solver</span>
+              </div>
+              
+              <!-- Chain of thought reasoning -->
+              <div id="cot-reasoning" class="incident-solver-co-t">
+                <p style="font-size: 0.85rem; color: var(--color-text-secondary); text-align: center; padding: var(--spacing-md) 0;">
+                  Ready to assist. Choose or report an incident to engage GenAI decision support.
+                </p>
+              </div>
+
+              <!-- SOP checklist actions generated by AI -->
+              <h4 style="font-size: 0.95rem; margin-bottom: var(--spacing-sm);">📋 AI-Generated SOP Checklist</h4>
+              <ul id="sop-tasks" class="incident-sop-list">
+                <!-- Population by JS -->
+              </ul>
+
+              <!-- Multilingual Stadium Broadcasts -->
+              <div style="margin-top: var(--spacing-md);">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: var(--spacing-xs);">
+                  <h4 style="font-size: 0.95rem;">📢 Fan Public Broadcast Drafts</h4>
+                  <button class="btn btn-danger" id="ops-send-broadcast" style="padding: 4px 10px; font-size: 0.75rem;">Broadcast Announcement</button>
+                </div>
+                <div id="broadcast-translations">
+                  <!-- Translation tabs loaded by JS -->
+                </div>
+              </div>
+            </div>
+
+            <!-- Active Dispatches log -->
+            <div class="glass-panel" style="padding: var(--spacing-lg);">
+              <div class="card-header">
+                <h3 class="card-title">📞 Active Staff Dispatches</h3>
+              </div>
+              <div id="dispatch-list" class="log-container">
+                <!-- Dispatches populated by JS -->
+              </div>
+            </div>
+
+            <!-- Sustainability Tracker -->
+            <div class="glass-panel" style="padding: var(--spacing-lg);">
+              <div class="card-header">
+                <h3 class="card-title">🌱 Sustainability Operations</h3>
+                <span class="status-badge" style="background: rgba(0, 230, 118, 0.1); border-color: rgba(0, 230, 118, 0.3); color: var(--color-success);">Eco-Efficient</span>
+              </div>
+              <div class="grid-2" style="gap: var(--spacing-sm); margin-bottom: var(--spacing-md);">
+                <div style="background: rgba(255,255,255,0.02); padding: var(--spacing-sm); border-radius: var(--radius-sm); text-align: center;">
+                  <span style="font-size: 0.75rem; color: var(--color-text-secondary);">Solar Generation</span>
+                  <h4 style="font-size: 1.15rem; color: var(--color-success);" id="telemetry-solar">345 kW</h4>
+                </div>
+                <div style="background: rgba(255,255,255,0.02); padding: var(--spacing-sm); border-radius: var(--radius-sm); text-align: center;">
+                  <span style="font-size: 0.75rem; color: var(--color-text-secondary);">Water Saved Today</span>
+                  <h4 style="font-size: 1.15rem; color: var(--color-success);" id="telemetry-water">14,520 Gal</h4>
+                </div>
+                <div style="background: rgba(255,255,255,0.02); padding: var(--spacing-sm); border-radius: var(--radius-sm); text-align: center; grid-column: span 2;">
+                  <span style="font-size: 0.75rem; color: var(--color-text-secondary);">Concourse HVAC Grid-Savings</span>
+                  <h4 style="font-size: 1.15rem; color: var(--color-success);" id="telemetry-energy">1,240 kWh</h4>
+                </div>
+              </div>
+              
+              <div class="progress-container">
+                <div class="progress-label-row">
+                  <span>Waste Diversion Rate</span>
+                  <span id="waste-value-text">82.4%</span>
+                </div>
+                <div class="progress-bar-bg">
+                  <div class="progress-bar-fill fill-success" id="bar-waste-diversion" style="width: 82.4%"></div>
+                </div>
+              </div>
+
+              <div id="sustainability-tips" style="margin-top: var(--spacing-md);">
+                <!-- Load AI recommendations -->
+              </div>
+            </div>
+
+            <!-- Operational System Logs (Audit trail) -->
+            <div class="glass-panel" style="padding: var(--spacing-lg);">
+              <div class="card-header">
+                <h3 class="card-title">📋 Live Security & Operations Log</h3>
+              </div>
+              <div id="ops-system-logs" class="log-container">
+                <!-- System Audit logs injected here -->
+              </div>
+            </div>
+
+          </div>
+        </section>
+
+        <!-- ============================================== -->
+        <!-- VIEW 2: FAN PORTAL (SPECTATOR INTERFACE) -->
+        <!-- ============================================== -->
+        <section class="dashboard-layout animate-fade-in" id="view-fan" style="display: none;">
+          
+          <!-- Left Column: Map Guide, Ticket and Settings -->
+          <div style="display: flex; flex-direction: column; gap: var(--spacing-lg); overflow-y: auto; padding-right: var(--spacing-sm);">
+            
+            <!-- Fan Seating & Preferences Card -->
+            <div class="glass-panel" style="padding: var(--spacing-lg);">
+              <div class="card-header">
+                <h3 class="card-title">🎟️ Match Ticket & Context Settings</h3>
+              </div>
+              <div class="ticket-badge">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: var(--spacing-xs);">
+                  <strong>FIFA World Cup 2026™</strong>
+                  <span style="font-size: 0.75rem; background: var(--color-brand-primary); color: var(--color-bg-base); font-weight: 700; padding: 2px 6px; border-radius: var(--radius-xs);">MATCH 42</span>
+                </div>
+                <p style="font-size: 1.15rem; font-weight: 800; font-family: var(--font-heading);">USA vs ENGLAND</p>
+                <div style="display: flex; gap: var(--spacing-md); font-size: 0.8rem; color: var(--color-text-secondary); margin-top: var(--spacing-sm);">
+                  <span>Section: <strong>118</strong></span>
+                  <span>Row: <strong>12</strong></span>
+                  <span>Seat: <strong>8</strong></span>
+                </div>
+              </div>
+              
+              <div style="display: flex; flex-direction: column; gap: var(--spacing-sm);">
+                <div style="display: flex; gap: var(--spacing-sm); align-items: center;">
+                  <label for="fan-section-select" style="font-size: 0.85rem; width: 120px;">Ticket Section:</label>
+                  <select id="fan-section-select" style="flex: 1;" aria-label="Select your ticket section">
+                    <option value="118" selected>Section 118 (East Stand)</option>
+                    <option value="105">Section 105 (North Stand)</option>
+                    <option value="130">Section 130 (South Stand)</option>
+                    <option value="142">Section 142 (West Stand)</option>
+                  </select>
+                </div>
+                
+                <div style="display: flex; gap: var(--spacing-sm); align-items: center;">
+                  <label for="fan-gate-select" style="font-size: 0.85rem; width: 120px;">Current Location:</label>
+                  <select id="fan-gate-select" style="flex: 1;" aria-label="Select your current gate location">
+                    <option value="Gate A" selected>Gate A (East Gate)</option>
+                    <option value="Gate B">Gate B (North Gate)</option>
+                    <option value="Gate C">Gate C (West Gate)</option>
+                    <option value="Gate D">Gate D (South Gate)</option>
+                  </select>
+                </div>
+
+                <div style="display: flex; gap: var(--spacing-sm); align-items: center; border-top: 1px solid var(--color-border-glass); padding-top: var(--spacing-sm);">
+                  <label for="fan-lang-select" style="font-size: 0.85rem; width: 120px;">Language:</label>
+                  <select id="fan-lang-select" style="flex: 1;" aria-label="Select language">
+                    <option value="en" selected>English</option>
+                    <option value="es">Español (Spanish)</option>
+                    <option value="fr">Français (French)</option>
+                    <option value="pt">Português (Portuguese)</option>
+                    <option value="ar">العربية (Arabic)</option>
+                  </select>
+                </div>
+
+                <div style="display: flex; justify-content: space-between; align-items: center; background: rgba(255, 255, 255, 0.02); padding: var(--spacing-sm); border-radius: var(--radius-sm);">
+                  <span style="font-size: 0.85rem;">♿ Require Wheelchair/Step-Free Route</span>
+                  <label class="switch" style="position: relative; display: inline-block; width: 44px; height: 22px;">
+                    <input type="checkbox" id="fan-access-toggle" aria-label="Toggle Wheelchair Routing" style="opacity: 0; width: 0; height: 0;">
+                    <span style="position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #ccc; border-radius: 34px; transition: .4s; display: block;"></span>
+                  </label>
+                  <style>
+                    /* Custom switch CSS since we are doing Vanilla */
+                    .switch input:checked + span { background-color: var(--color-brand-primary); }
+                    .switch span:before {
+                      position: absolute; content: ""; height: 16px; width: 16px; left: 3px; bottom: 3px;
+                      background-color: white; border-radius: 50%; transition: .4s;
+                    }
+                    .switch input:checked + span:before { transform: translateX(22px); }
+                  </style>
+                </div>
+              </div>
+            </div>
+
+            <!-- Stadium Navigation Map (Fan View) -->
+            <div class="glass-panel" style="padding: var(--spacing-lg);">
+              <div class="card-header">
+                <h3 class="card-title">🗺️ Seating Map & Navigation Guidance</h3>
+              </div>
+              <div style="text-align: center; font-size: 0.8rem; color: var(--color-text-secondary); margin-bottom: var(--spacing-xs);">
+                Ask the AI Assistant on the right to display routes or locate facilities!
+              </div>
+              <div class="map-wrapper" style="height: 300px;" aria-label="Interactive Stadium Map">
+                <!-- Map SVG copy drawn by map-renderer.js -->
+              </div>
+            </div>
+
+            <!-- Live Crowd Flow Status Advisor Widgets -->
+            <div class="glass-panel" style="padding: var(--spacing-lg);">
+              <div class="card-header">
+                <h3 class="card-title">📊 Stadium Flow Fast Advisor</h3>
+              </div>
+              <div class="fan-widgets">
+                <div class="fan-widget-card">
+                  <div class="widget-icon">🎫</div>
+                  <div class="widget-value" id="fan-widget-gate">Gate A: 42s</div>
+                  <div class="widget-desc">Average Entrance Wait</div>
+                </div>
+                <div class="fan-widget-card">
+                  <div class="widget-icon">🍔</div>
+                  <div class="widget-value">6 mins</div>
+                  <div class="widget-desc">Verde Taqueria Queue</div>
+                </div>
+                <div class="fan-widget-card">
+                  <div class="widget-icon">🚽</div>
+                  <div class="widget-value">3 mins</div>
+                  <div class="widget-desc">Sec 115 Bathroom wait</div>
+                </div>
+              </div>
+            </div>
+
+          </div>
+          
+          <!-- Right Column: AI Fan Assistant Chat Window -->
+          <div style="display: flex; flex-direction: column; height: 100%;">
+            
+            <div class="glass-panel glass-panel-glow" style="flex: 1; display: flex; flex-direction: column; border-color: rgba(0, 242, 254, 0.2);">
+              <div class="card-header" style="padding: var(--spacing-md); border-bottom: 1px solid var(--color-border-glass);">
+                <div style="display: flex; align-items: center; gap: var(--spacing-sm);">
+                  <div style="width: 10px; height: 10px; background: var(--color-success); border-radius: 50%; display: block;" class="animate-pulse-radar"></div>
+                  <div>
+                    <h3 class="card-title" style="font-size: 1rem;">🤖 FIFA Tournament Assistant</h3>
+                    <span style="font-size: 0.7rem; color: var(--color-text-secondary);">Real-Time Navigation, Food, Transit & Accessibility support</span>
+                  </div>
+                </div>
+              </div>
+              
+              <!-- Chat Messages Container -->
+              <div class="chat-container">
+                <div class="chat-messages" id="chat-box-messages" role="log" aria-live="polite">
+                  <!-- Populated by JS -->
+                </div>
+                
+                <!-- Quick suggestions box -->
+                <div id="chat-suggestions" style="padding: 0 var(--spacing-md) var(--spacing-sm); display: flex; gap: var(--spacing-xs); flex-wrap: wrap;">
+                  <!-- suggestions injected here -->
+                </div>
+
+                <!-- Input area -->
+                <form id="chat-form" class="chat-input-area" onsubmit="return false;">
+                  <input type="text" id="chat-input" class="chat-input" placeholder="Ask AI: e.g. Where is wheelchair access?" aria-label="Type message to AI Assistant">
+                  <button type="button" class="btn btn-secondary" id="btn-voice" aria-label="Record voice query">🎤 Mic</button>
+                  <button type="submit" class="btn btn-primary" id="btn-send">Send</button>
+                </form>
+              </div>
+
+            </div>
+
+          </div>
+
+        </section>
+
+      </div>
+    </main>
+
+  </div>
+
+  <!-- Javascript Modules -->
+  <script src="js/data.js"></script>
+  <script src="js/ai-engine.js"></script>
+  <script src="js/map-renderer.js"></script>
+  <script src="js/ui-manager.js"></script>
+  <script src="js/main.js"></script>
+</body>
+</html>
