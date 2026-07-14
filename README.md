@@ -1,5 +1,8 @@
 # ArenaFlow AI - FIFA World Cup 2026 Smart Stadium Platform
 
+## 🌐 Live Deployment Link
+**Deployment URL**: [https://rubini-0729.github.io/-ArenaFlow-AI/](https://rubini-0729.github.io/-ArenaFlow-AI/)
+
 **ArenaFlow AI** is a Generative AI-enabled stadium operations command center and fan engagement platform built for the FIFA World Cup 2026. The solution leverages Generative AI and real-time telemetry to optimize crowd management, accessibility routing, transportation logistics, multilingual support, and sustainability operations inside MetLife Arena (NY/NJ).
 
 ---
@@ -86,7 +89,62 @@ A Node-compatible automated testing suite (`tests/ai-engine.test.js`) validates:
 
 ---
 
-## 5. Assumptions Made
+## 5. System Flows & Interactive Mechanics
+
+### A. Operations Incident Mitigation Flow
+1. **Triggering**: An operator selects a scenario (e.g., "Gate A Bottleneck") or types a custom report.
+2. **Analysis**: The GenAI engine runs its Chain-of-Thought reasoning, classifying safety levels and bottleneck areas.
+3. **Action & Visualization**: 
+   - A list of task-oriented checklists is displayed in the Ops Panel.
+   - Dispatch teams are created and visualised in the dispatch ticker.
+   - The map highlights the bottleneck (pulsing Gate A red) and draws a detour path to Gate B.
+4. **Resolution**: The operator reviews progress, dispatches staff, and clicks **Resolve**. Telemetry normalization is triggered: crowd density drops back to optimal, the red radar clears from the map, and an audit trail log is appended.
+
+### B. Spectator Food Finder & Eco-Challenge Flow
+1. **Food Finder**: A fan chooses a dietary preference. The AI identifies the closest stand relative to their section with the shortest line wait-time, prints details, and draws a routed spline on the stadium map.
+2. **Eco-Action Logging**: A fan logs recycling or train transit. The GenAI registers the action, adds carbon offsets to their session total, updates the sustainability meter, and promotes their status badge, unlocking concession coupon codes.
+
+---
+
+## 6. System Architecture & Components Relationship
+
+ArenaFlow AI is structured into highly cohesive modules, facilitating maintainability and strict separation of concerns:
+
+```
++-----------------------------------------------------------------------------------+
+|                                  INDEX.HTML                                       |
+|  Main DOM layout with sidebar navigation, operations hub grids, and fan panels.   |
++--------------------------+------------------------------+-------------------------+
+                           |                              |
+                           v                              v
+                  +-----------------+            +------------------+
+                  |  UI-MANAGER.JS  |            |  MAP-RENDERER.JS |
+                  |  Orchestrates   |            |  Renders the     |
+                  |  DOM updates,   |            |  interactive SVG |
+                  |  clicks, and    +----------->|  vector map,     |
+                  |  telemetry loops|            |  routing paths   |
+                  +--------+--------+            +------------------+
+                           |
+                           v
+                  +-----------------+
+                  |   AI-ENGINE.JS  |
+                  |  Houses logic   |
+                  |  for intent CoT |
+                  |  and log awards |
+                  +--------+--------+
+                           |
+                           v
+                  +-----------------+
+                  |     DATA.JS     |
+                  |  Stores stadium |
+                  |  coords, presets|
+                  |  and databases  |
+                  +-----------------+
+```
+
+---
+
+## 7. Assumptions Made
 
 1. **Stadium Configuration**: The application assumes a standardized layout resembling MetLife Stadium with 4 main gates (A, B, C, D) and a multi-level concourse.
 2. **Sensors Telemetry**: Simulated sensor data (solar energy output, gate scans per minute, line waits) mirrors telemetry patterns of modern stadiums during a match day.
@@ -94,7 +152,7 @@ A Node-compatible automated testing suite (`tests/ai-engine.test.js`) validates:
 
 ---
 
-## 6. How to Run & Verify
+## 8. How to Run & Verify
 
 1. **Launch the Web App**:
    Simply open the `index.html` file in any modern web browser.
