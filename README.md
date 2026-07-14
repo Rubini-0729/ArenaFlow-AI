@@ -1,7 +1,7 @@
 # ArenaFlow AI - FIFA World Cup 2026 Smart Stadium Platform
 
 ## 🌐 Live Deployment Link
-**Deployment URL**: [https://rubini-0729.github.io/-ArenaFlow-AI/](https://rubini-0729.github.io/-ArenaFlow-AI/)
+**Deployment URL**: [https://rubini-0729.github.io/ArenaFlow-AI/](https://rubini-0729.github.io/ArenaFlow-AI/)
 
 **ArenaFlow AI** is a Generative AI-enabled stadium operations command center and fan engagement platform built for the FIFA World Cup 2026. The solution leverages Generative AI and real-time telemetry to optimize crowd management, accessibility routing, transportation logistics, multilingual support, and sustainability operations inside MetLife Arena (NY/NJ).
 
