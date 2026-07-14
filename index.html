@@ -309,6 +309,21 @@
               </div>
             </div>
 
+            <!-- Smart Concessions Food Finder Card -->
+            <div class="glass-panel" style="padding: var(--spacing-lg);">
+              <div class="card-header">
+                <h3 class="card-title">🍔 AI Concessions Food Finder</h3>
+              </div>
+              <p style="font-size: 0.8rem; color: var(--color-text-secondary); margin-bottom: var(--spacing-sm);">
+                GenAI analyzes queue times and distances to recommend the best concessions stand:
+              </p>
+              <div style="display: flex; gap: var(--spacing-sm);">
+                <button class="btn btn-secondary" style="flex: 1; font-size: 0.75rem;" onclick="window.ui.handleFoodFinderSelection('vegan')">🌱 Vegan Options</button>
+                <button class="btn btn-secondary" style="flex: 1; font-size: 0.75rem;" onclick="window.ui.handleFoodFinderSelection('halal')">🥙 Halal Cart</button>
+                <button class="btn btn-secondary" style="flex: 1; font-size: 0.75rem;" onclick="window.ui.handleFoodFinderSelection('burgers')">🍔 Burgers & Grill</button>
+              </div>
+            </div>
+
             <!-- Stadium Navigation Map (Fan View) -->
             <div class="glass-panel" style="padding: var(--spacing-lg);">
               <div class="card-header">
@@ -319,6 +334,30 @@
               </div>
               <div class="map-wrapper" style="height: 300px;" aria-label="Interactive Stadium Map">
                 <!-- Map SVG copy drawn by map-renderer.js -->
+              </div>
+            </div>
+
+            <!-- Gamified Eco-Challenge Card -->
+            <div class="glass-panel" style="padding: var(--spacing-lg);">
+              <div class="card-header">
+                <h3 class="card-title">🌱 Fan Sustainability Eco-Challenges</h3>
+              </div>
+              <p style="font-size: 0.8rem; color: var(--color-text-secondary); margin-bottom: var(--spacing-sm);">
+                Log your matchday eco-actions to offset carbon footprint and earn merchandise discounts:
+              </p>
+              <div style="display: flex; flex-direction: column; gap: var(--spacing-xs);">
+                <div style="display: flex; justify-content: space-between; align-items: center; background: rgba(255,255,255,0.02); padding: var(--spacing-sm); border-radius: var(--radius-sm); border: 1px solid var(--color-border-glass);">
+                  <span style="font-size: 0.8rem;">🥤 Recycle plastic bottles/cups</span>
+                  <button class="btn btn-primary" style="font-size: 0.7rem; padding: 2px 8px;" onclick="window.ui.handleEcoActionLog('eco-1')">Log Action</button>
+                </div>
+                <div style="display: flex; justify-content: space-between; align-items: center; background: rgba(255,255,255,0.02); padding: var(--spacing-sm); border-radius: var(--radius-sm); border: 1px solid var(--color-border-glass);">
+                  <span style="font-size: 0.8rem;">🚆 Traveled via Express Train / Subway</span>
+                  <button class="btn btn-primary" style="font-size: 0.7rem; padding: 2px 8px;" onclick="window.ui.handleEcoActionLog('eco-2')">Log Action</button>
+                </div>
+                <div style="display: flex; justify-content: space-between; align-items: center; background: rgba(255,255,255,0.02); padding: var(--spacing-sm); border-radius: var(--radius-sm); border: 1px solid var(--color-border-glass);">
+                  <span style="font-size: 0.8rem;">💧 Refilled reusable bottle at water station</span>
+                  <button class="btn btn-primary" style="font-size: 0.7rem; padding: 2px 8px;" onclick="window.ui.handleEcoActionLog('eco-4')">Log Action</button>
+                </div>
               </div>
             </div>
 

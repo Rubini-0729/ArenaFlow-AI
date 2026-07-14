@@ -265,6 +265,34 @@ class StadiumMapRenderer {
           }
         }
       });
+    } else if (highlightPkg.type === 'concession-route') {
+      const stand = CONCESSIONS_DATA.find(c => c.id === highlightPkg.standId);
+      if (stand) {
+        const secNum = highlightPkg.fromSection;
+        let startCoord = { x: 250, y: 160 };
+        if (secNum > 130) startCoord = { x: 250, y: 340 };
+        else if (secNum > 115) startCoord = { x: 330, y: 250 };
+        else if (secNum > 110) startCoord = { x: 170, y: 250 };
+        
+        this.drawRoutePath(startCoord, stand.coordinates, false);
+        
+        const el = document.getElementById(`map-${stand.id}`);
+        if (el) {
+          el.setAttribute('opacity', '1.0');
+          el.setAttribute('style', 'transform: scale(2.0); transform-origin: ' + stand.coordinates.x + 'px ' + stand.coordinates.y + 'px; filter: drop-shadow(0 0 8px var(--color-warning));');
+        }
+      }
+    } else if (highlightPkg.type === 'evacuation') {
+      document.querySelectorAll('.map-sector').forEach(s => {
+        s.setAttribute('fill', 'rgba(255, 82, 82, 0.3)');
+        s.setAttribute('style', 'animation: pulseDanger 1.5s infinite;');
+      });
+      const route = document.getElementById('map-route');
+      if (route) {
+        route.setAttribute('d', 'M 100,250 L 170,250 M 400,250 L 330,250 M 250,100 L 250,180 M 250,400 L 250,320');
+        route.setAttribute('stroke', 'var(--color-danger)');
+        route.setAttribute('stroke-width', '5');
+      }
     }
   }
 

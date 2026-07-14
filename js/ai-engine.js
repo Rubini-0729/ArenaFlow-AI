@@ -222,6 +222,17 @@ class ArenaFlowAIEngine {
       ];
     }
 
+    let highlightMap = {};
+    if (incident.type === "Crowd Management") {
+      highlightMap = { type: 'route', from: 'Gate A', to: 'Gate B', redirect: true };
+    } else if (incident.type === "Accessibility") {
+      highlightMap = { type: 'route', from: 'Gate D', to: 'Section 202', accessible: true };
+    } else if (incident.type === "Safety") {
+      highlightMap = { type: 'evacuation', sectors: ['sec-north', 'sec-east', 'sec-south', 'sec-west'] };
+    } else {
+      highlightMap = { type: 'transport', delay: true };
+    }
+
     return {
       incidentId: incident.id,
       title: incident.title,
@@ -231,6 +242,7 @@ class ArenaFlowAIEngine {
       actionPlan,
       broadcasts,
       dispatches,
+      highlightMap,
       timestamp: new Date().toLocaleTimeString()
     };
   }
@@ -268,6 +280,82 @@ class ArenaFlowAIEngine {
     }
 
     return recs;
+  }
+
+  /**
+   * Recommends the best concession stand based on dietary preference and seat location.
+   */
+  findBestConcession(preference, seatSection = 118) {
+    const list = CONCESSIONS_DATA;
+    let filtered = list;
+    
+    if (preference === 'vegan') {
+      filtered = list.filter(c => c.vegan);
+    } else if (preference === 'halal') {
+      filtered = list.filter(c => c.name.toLowerCase().includes('halal') || c.type.toLowerCase().includes('gyro'));
+    } else if (preference === 'burgers') {
+      filtered = list.filter(c => c.type.toLowerCase().includes('burger') || c.type.toLowerCase().includes('grill'));
+    }
+
+    if (filtered.length === 0) filtered = list;
+
+    let bestStand = filtered[0];
+    let minScore = Infinity;
+    
+    filtered.forEach(c => {
+      const dist = Math.abs(c.section - seatSection);
+      const score = dist * 2 + c.waitTime;
+      if (score < minScore) {
+        minScore = score;
+        bestStand = c;
+      }
+    });
+
+    const responseText = `AI Recommendation: The best choice matching your preference is "${bestStand.name}" at Section ${bestStand.section}. ` +
+      `Current line wait time is only ${bestStand.waitTime} minutes. It is located in the ${bestStand.section > 130 ? 'South' : bestStand.section > 115 ? 'East' : 'North'} concourse.`;
+
+    return {
+      stand: bestStand,
+      response: responseText,
+      highlightMap: { type: 'concession-route', standId: bestStand.id, fromSection: seatSection }
+    };
+  }
+
+  /**
+   * Logs a fan eco challenge action, returns carbon offset and updates badge rewards.
+   */
+  logEcoAction(actionId, totalCO2Acc = 0) {
+    const challenge = ECO_CHALLENGES_DATA.find(e => e.id === actionId);
+    if (!challenge) {
+      return {
+        message: "Invalid eco challenge.",
+        offset: 0,
+        badge: "Eco Supporter",
+        reward: "None"
+      };
+    }
+
+    const newCO2Acc = totalCO2Acc + challenge.co2Offset;
+    
+    let activeReward = ECO_REWARDS_DATA[0];
+    ECO_REWARDS_DATA.forEach(r => {
+      if (newCO2Acc >= r.co2Limit) {
+        activeReward = r;
+      }
+    });
+
+    const msg = `GenAI logged action: "${challenge.title}". You offset ${challenge.co2Offset} kg of CO2! ` +
+      `Your carbon offset total is now ${newCO2Acc.toFixed(2)} kg. ` +
+      `Award: [${activeReward.badge}] - Code: "${activeReward.reward}". Thank you for supporting FIFA 2026 Sustainability!`;
+
+    return {
+      challenge,
+      offset: challenge.co2Offset,
+      newTotal: newCO2Acc,
+      badge: activeReward.badge,
+      reward: activeReward.reward,
+      message: msg
+    };
   }
 }
 

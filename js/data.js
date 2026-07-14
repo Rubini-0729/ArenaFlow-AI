@@ -143,6 +143,19 @@ const MULTILINGUAL_DATABASE = {
   }
 };
 
+const ECO_CHALLENGES_DATA = [
+  { id: "eco-1", title: "Plastic bottle recycling", co2Offset: 0.15, text: "Recycle single-use plastic cups/bottles in blue bin" },
+  { id: "eco-2", title: "Public transit transit", co2Offset: 1.2, text: "Travel to stadium via train/metro instead of car" },
+  { id: "eco-3", title: "Composting food waste", co2Offset: 0.25, text: "Deposit leftover food items in composting bin" },
+  { id: "eco-4", title: "Use water refill station", co2Offset: 0.08, text: "Refill reusable bottle at water station" }
+];
+
+const ECO_REWARDS_DATA = [
+  { co2Limit: 0.1, badge: "Green Supporter", reward: "Digital Eco-Sticker & 5% Concessions Code: ECOGREEN5" },
+  { co2Limit: 0.3, badge: "Carbon Warrior", reward: "Digital Player Card & 10% Merch Code: WARRIOR10" },
+  { co2Limit: 1.0, badge: "Eco MVP Champion", reward: "Matchday Certificate & 20% Food/Drink Code: MVPECO20" }
+];
+
 // Export definitions for browser loading or module usage
 if (typeof module !== 'undefined' && module.exports) {
   module.exports = {
@@ -153,6 +166,8 @@ if (typeof module !== 'undefined' && module.exports) {
     TRANSPORT_DATA,
     SUSTAINABILITY_TELEMETRY,
     PRESET_INCIDENTS,
-    MULTILINGUAL_DATABASE
+    MULTILINGUAL_DATABASE,
+    ECO_CHALLENGES_DATA,
+    ECO_REWARDS_DATA
   };
 }

@@ -16,6 +16,7 @@ class ArenaFlowUIManager {
 
     // Telemetry State
     this.telemetry = { ...SUSTAINABILITY_TELEMETRY };
+    this.fanCO2Total = 0.0;
   }
 
   init() {
@@ -89,7 +90,8 @@ class ArenaFlowUIManager {
     if (langSelect) {
       langSelect.addEventListener('change', (e) => {
         this.selectedLanguage = e.target.value;
-        this.sendAIMessage(this.selectedLanguage === 'en' ? 'Hello' : this.selectedLanguage === 'es' ? 'Hola' : 'Bonjour');
+        const responsePkg = this.ai.processFanQuery('hello', this.selectedLanguage, this.fanContext);
+        this.appendAIMessage(responsePkg.response);
       });
     }
 
@@ -243,13 +245,16 @@ class ArenaFlowUIManager {
     // Render Dispatches
     const dispatchBox = document.getElementById('dispatch-list');
     if (dispatchBox) {
-      dispatchBox.innerHTML = resolution.dispatches.map(d => `
-        <div class="log-item log-${d.priority === 'Critical' ? 'critical' : d.priority === 'High' ? 'warning' : 'info'}">
+      dispatchBox.innerHTML = resolution.dispatches.map((d, index) => `
+        <div class="log-item log-${d.priority === 'Critical' ? 'critical' : d.priority === 'High' ? 'warning' : 'info'}" id="dispatch-item-${index}">
           <div>
             <strong>${d.team} (${d.unit})</strong> @ ${d.location}<br/>
             <span style="font-size: 0.8rem; color: var(--color-text-secondary);">${d.task}</span>
           </div>
-          <span class="status-badge" style="background: rgba(255, 82, 82, 0.1); border-color: rgba(255, 82, 82, 0.3); color: var(--color-danger);">${d.priority}</span>
+          <div style="display: flex; flex-direction: column; align-items: flex-end;">
+            <span class="status-badge" style="background: rgba(255, 82, 82, 0.1); border-color: rgba(255, 82, 82, 0.3); color: var(--color-danger);">${d.priority}</span>
+            <button class="btn btn-secondary" style="font-size: 0.65rem; padding: 2px 6px; margin-top: 4px;" onclick="window.ui.resolveDispatch('${incident.id}', ${index})">Resolve</button>
+          </div>
         </div>
       `).join('');
     }
@@ -459,6 +464,82 @@ class ArenaFlowUIManager {
       <span style="font-size: 0.75rem; text-transform: uppercase; opacity: 0.8;">${severity}</span>
     `;
     logBox.insertBefore(div, logBox.firstChild);
+  }
+
+  /**
+   * Simulates resolving an active dispatch ticket, updating telemetry metrics back to optimal.
+   */
+  resolveDispatch(incidentId, index) {
+    const el = document.getElementById(`dispatch-item-${index}`);
+    if (el) {
+      el.remove();
+    }
+    
+    this.appendSystemLog(`Dispatch team resolved task for ${incidentId}`, "success");
+
+    if (incidentId === 'INC-101') {
+      GATES_DATA['Gate A'].crowdLevel = 35;
+      GATES_DATA['Gate A'].status = 'Optimal';
+      GATES_DATA['Gate A'].scanRate = 32;
+      this.map.updateSectorCrowd('sec-east', 35);
+      this.map.init();
+      this.map.applyHighlight(null);
+      this.appendSystemLog("Gate A local network routers repaired. Crowd levels normalized.", "success");
+    } else if (incidentId === 'INC-102') {
+      this.map.applyHighlight(null);
+      this.appendSystemLog("North stand Lift #3 mechanical repairs completed. Elevators active.", "success");
+    } else if (incidentId === 'INC-103') {
+      document.querySelectorAll('.map-sector').forEach(s => {
+        s.removeAttribute('style');
+        s.setAttribute('fill', 'rgba(0, 242, 254, 0.15)');
+      });
+      this.map.init();
+      this.map.applyHighlight(null);
+      this.appendSystemLog("Lightning warning cleared. Concourse evacuations canceled.", "success");
+    } else if (incidentId === 'INC-104') {
+      this.appendSystemLog("Shuttle route cleared of traffic. Shuttle frequency restored.", "success");
+    }
+    
+    this.updateOperationsTicker();
+  }
+
+  /**
+   * Logs a user-initiated Eco-Action and updates CO2 offsets and badge levels.
+   */
+  handleEcoActionLog(actionId) {
+    this.appendUserMessage(`Sustainability log: Submitting action ${actionId}...`);
+    this.showTypingIndicator();
+    
+    setTimeout(() => {
+      this.removeTypingIndicator();
+      const result = this.ai.logEcoAction(actionId, this.fanCO2Total);
+      this.fanCO2Total = result.newTotal;
+      this.appendAIMessage(result.message);
+
+      // Increment water saved dynamically if it is a water action
+      if (actionId === 'eco-4') {
+        this.telemetry.waterSaved += 1;
+      }
+      this.telemetry.carbonFootprintOffset += Math.round(result.offset * 10);
+      
+      this.renderSustainability();
+      this.appendSystemLog(`Fan logged eco-action: ${result.challenge.title}. Total offset: ${this.fanCO2Total.toFixed(2)} kg`, "success");
+    }, 600);
+  }
+
+  /**
+   * Recommends food options and highlights routes on the map.
+   */
+  handleFoodFinderSelection(preference) {
+    this.appendUserMessage(`Food Finder: Looking for ${preference} options...`);
+    this.showTypingIndicator();
+    
+    setTimeout(() => {
+      this.removeTypingIndicator();
+      const result = this.ai.findBestConcession(preference, this.fanContext.ticketSection);
+      this.appendAIMessage(result.response);
+      this.map.applyHighlight(result.highlightMap);
+    }, 600);
   }
 }
 

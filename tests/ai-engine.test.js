@@ -8,6 +8,9 @@ global.MULTILINGUAL_DATABASE = data.MULTILINGUAL_DATABASE;
 global.RESTROOMS_DATA = data.RESTROOMS_DATA;
 global.GATES_DATA = data.GATES_DATA;
 global.SUSTAINABILITY_TELEMETRY = data.SUSTAINABILITY_TELEMETRY;
+global.CONCESSIONS_DATA = data.CONCESSIONS_DATA;
+global.ECO_CHALLENGES_DATA = data.ECO_CHALLENGES_DATA;
+global.ECO_REWARDS_DATA = data.ECO_REWARDS_DATA;
 
 const ArenaFlowAIEngine = require('../js/ai-engine.js');
 
@@ -118,6 +121,38 @@ runTest("Incident Command - Elevator Malfunction", () => {
   assert.strictEqual(solution.incidentId, "INC-102");
   assert.ok(solution.chainOfThought.includes("service elevator"));
   assert.ok(solution.dispatches.find(d => d.team === "Accessibility Escort"));
+});
+
+// 5. Test Expansion Features (Food Finder & Eco-Challenge)
+runTest("Concession Finder - Vegan Recommendation", () => {
+  const result = engine.findBestConcession("vegan", 118);
+  assert.strictEqual(result.stand.vegan, true);
+  assert.strictEqual(result.highlightMap.type, "concession-route");
+  assert.strictEqual(result.highlightMap.standId, "c2"); // Verde Taqueria section 118 is closest to 118
+});
+
+runTest("Eco-Challenge - Log Action & Badge Promotion", () => {
+  const step1 = engine.logEcoAction("eco-1", 0.0);
+  assert.strictEqual(step1.offset, 0.15);
+  assert.strictEqual(step1.badge, "Green Supporter");
+  
+  const step2 = engine.logEcoAction("eco-2", 0.15);
+  assert.ok(Math.abs(step2.newTotal - 1.35) < 0.0001);
+  assert.strictEqual(step2.badge, "Eco MVP Champion");
+});
+
+runTest("Incident Command - Evacuation Map Highlights", () => {
+  const weatherIncident = {
+    id: "INC-103",
+    title: "Severe Weather",
+    type: "Safety",
+    severity: "High",
+    location: "Stadium Outer Areas"
+  };
+
+  const solution = engine.solveIncident(weatherIncident);
+  assert.strictEqual(solution.highlightMap.type, "evacuation");
+  assert.deepStrictEqual(solution.highlightMap.sectors, ['sec-north', 'sec-east', 'sec-south', 'sec-west']);
 });
 
 // Summary Report
