@@ -8,6 +8,9 @@
   <meta name="description" content="AI-enabled operations control center and fan assistant for smart stadiums during the FIFA World Cup 2026. Optimizes crowd management, transit, and sustainability.">
   <meta name="keywords" content="FIFA World Cup 2026, Smart Stadium, Operations Dashboard, AI Assistant, Crowd Management, Accessibility, Transit, Sustainability">
   
+  <!-- Content Security Policy -->
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self' https://fonts.googleapis.com https://fonts.gstatic.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; img-src 'self' data:; script-src 'self' 'unsafe-inline'; font-src https://fonts.gstatic.com; connect-src 'self';">
+  
   <!-- CSS Stylesheets -->
   <link rel="stylesheet" href="css/variables.css">
   <link rel="stylesheet" href="css/main.css">
@@ -178,7 +181,7 @@
               <div class="card-header">
                 <h3 class="card-title">📞 Active Staff Dispatches</h3>
               </div>
-              <div id="dispatch-list" class="log-container">
+              <div id="dispatch-list" class="log-container" role="log" aria-live="polite">
                 <!-- Dispatches populated by JS -->
               </div>
             </div>
@@ -224,7 +227,7 @@
               <div class="card-header">
                 <h3 class="card-title">📋 Live Security & Operations Log</h3>
               </div>
-              <div id="ops-system-logs" class="log-container">
+              <div id="ops-system-logs" class="log-container" role="log" aria-live="polite">
                 <!-- System Audit logs injected here -->
               </div>
             </div>

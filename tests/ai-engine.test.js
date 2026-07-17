@@ -1,3 +1,5 @@
+'use strict';
+
 /* Unit test suite for ArenaFlow GenAI Reasoning Engine */
 
 const assert = require('assert');

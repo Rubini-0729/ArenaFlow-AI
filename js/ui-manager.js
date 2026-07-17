@@ -1,36 +1,103 @@
+'use strict';
+
 /* ArenaFlow UI Manager & Orchestrator */
 
 class ArenaFlowUIManager {
+  /**
+   * @param {ArenaFlowAIEngine} aiEngine - AI engine module instance.
+   * @param {StadiumMapRenderer} mapRenderer - Map rendering module instance.
+   */
   constructor(aiEngine, mapRenderer) {
     this.ai = aiEngine;
     this.map = mapRenderer;
     this.currentView = 'ops'; // 'ops' or 'fan'
     this.selectedLanguage = 'en';
     
-    // Fan Context
+    // Fan Seating & Routing Context
     this.fanContext = {
       accessibilityNeeded: false,
       ticketSection: 118,
       currentGate: 'Gate A'
     };
 
-    // Telemetry State
+    // Telemetry Telecommunication simulation state
     this.telemetry = { ...SUSTAINABILITY_TELEMETRY };
     this.fanCO2Total = 0.0;
+
+    // DOM cache dictionary to avoid redundant search queries in loops
+    this.dom = {};
   }
 
+  /**
+   * Bootstraps UI events and telemetry simulation.
+   */
   init() {
+    this.cacheDOM();
     this.setupViewSwitching();
     this.setupFanPortal();
     this.setupOperationsCenter();
     this.setupAccessibilitySettings();
     this.startTelemetrySimulation();
     
-    // Initial renders
+    // Initial display renders
     this.renderSustainability();
     this.appendSystemLog("System initialized. Monitoring MetLife Arena telemetry.", "success");
   }
 
+  /**
+   * Caches all frequently-accessed DOM elements in a single place for rendering efficiency.
+   */
+  cacheDOM() {
+    this.dom = {
+      viewOps: document.getElementById('view-ops'),
+      viewFan: document.getElementById('view-fan'),
+      chatForm: document.getElementById('chat-form'),
+      chatInput: document.getElementById('chat-input'),
+      voiceBtn: document.getElementById('btn-voice'),
+      btnSend: document.getElementById('btn-send'),
+      suggestionsBox: document.getElementById('chat-suggestions'),
+      accessToggle: document.getElementById('fan-access-toggle'),
+      secSelect: document.getElementById('fan-section-select'),
+      gateSelect: document.getElementById('fan-gate-select'),
+      langSelect: document.getElementById('fan-lang-select'),
+      cotBox: document.getElementById('cot-reasoning'),
+      sopBox: document.getElementById('sop-tasks'),
+      dispatchBox: document.getElementById('dispatch-list'),
+      translationBox: document.getElementById('broadcast-translations'),
+      contrastBtn: document.getElementById('btn-contrast-toggle'),
+      textSizeBtn: document.getElementById('btn-text-size'),
+      solarText: document.getElementById('telemetry-solar'),
+      waterText: document.getElementById('telemetry-water'),
+      energyText: document.getElementById('telemetry-energy'),
+      wasteBar: document.getElementById('bar-waste-diversion'),
+      wasteText: document.getElementById('waste-value-text'),
+      sustainabilityTips: document.getElementById('sustainability-tips'),
+      gatesList: document.getElementById('gates-list'),
+      chatMessages: document.getElementById('chat-box-messages'),
+      opsLogs: document.getElementById('ops-system-logs'),
+      announceBanner: document.getElementById('global-announcement-banner')
+    };
+  }
+
+  /**
+   * Escapes HTML control characters to prevent Cross-Site Scripting (XSS) injections.
+   * @param {string} str - Raw input text.
+   * @returns {string} Sanitized string.
+   */
+  escapeHTML(str) {
+    if (typeof str !== 'string') return '';
+    return str.replace(/[&<>'"]/g, tag => ({
+      '&': '&amp;',
+      '<': '&lt;',
+      '>': '&gt;',
+      "'": '&#39;',
+      '"': '&quot;'
+    }[tag] || tag));
+  }
+
+  /**
+   * Handles sidebar menu navigation tab switches.
+   */
   setupViewSwitching() {
     const navItems = document.querySelectorAll('.menu-item');
     navItems.forEach(item => {
@@ -42,12 +109,12 @@ class ArenaFlowUIManager {
         navItems.forEach(nav => nav.classList.remove('active'));
         item.classList.add('active');
 
-        // Toggle Views
-        document.getElementById('view-ops').style.display = view === 'ops' ? 'grid' : 'none';
-        document.getElementById('view-fan').style.display = view === 'fan' ? 'grid' : 'none';
+        // Toggle Views via cached references
+        if (this.dom.viewOps) this.dom.viewOps.style.display = view === 'ops' ? 'grid' : 'none';
+        if (this.dom.viewFan) this.dom.viewFan.style.display = view === 'fan' ? 'grid' : 'none';
         this.currentView = view;
 
-        // Re-init map on container resize/show
+        // Re-init map SVG nodes on display layout toggle
         setTimeout(() => {
           this.map.init();
         }, 100);
@@ -55,84 +122,81 @@ class ArenaFlowUIManager {
     });
   }
 
+  /**
+   * Wires spectator options, language parameters, and chatbot inputs.
+   */
   setupFanPortal() {
-    const chatForm = document.getElementById('chat-form');
-    const chatInput = document.getElementById('chat-input');
-    const voiceBtn = document.getElementById('btn-voice');
-    const btnSend = document.getElementById('btn-send');
-    const suggestionsBox = document.getElementById('chat-suggestions');
-    const accessToggle = document.getElementById('fan-access-toggle');
-    const secSelect = document.getElementById('fan-section-select');
-    const gateSelect = document.getElementById('fan-gate-select');
-    const langSelect = document.getElementById('fan-lang-select');
-
     // Section/Gate changes update context
-    if (secSelect) {
-      secSelect.addEventListener('change', (e) => {
-        this.fanContext.ticketSection = parseInt(e.target.value);
+    if (this.dom.secSelect) {
+      this.dom.secSelect.addEventListener('change', (e) => {
+        this.fanContext.ticketSection = parseInt(e.target.value, 10);
         this.appendSystemLog(`Fan seating updated to Section ${this.fanContext.ticketSection}`, "info");
       });
     }
 
-    if (gateSelect) {
-      gateSelect.addEventListener('change', (e) => {
+    if (this.dom.gateSelect) {
+      this.dom.gateSelect.addEventListener('change', (e) => {
         this.fanContext.currentGate = e.target.value;
       });
     }
 
-    if (accessToggle) {
-      accessToggle.addEventListener('change', (e) => {
+    if (this.dom.accessToggle) {
+      this.dom.accessToggle.addEventListener('change', (e) => {
         this.fanContext.accessibilityNeeded = e.target.checked;
         this.appendSystemLog(`Accessibility support mode: ${e.target.checked ? 'ENABLED' : 'DISABLED'}`, "info");
       });
     }
 
-    if (langSelect) {
-      langSelect.addEventListener('change', (e) => {
+    if (this.dom.langSelect) {
+      this.dom.langSelect.addEventListener('change', (e) => {
         this.selectedLanguage = e.target.value;
         const responsePkg = this.ai.processFanQuery('hello', this.selectedLanguage, this.fanContext);
-        this.appendAIMessage(responsePkg.response);
+        this.appendAIMessage(responsePkg.response, responsePkg.inferenceContext);
       });
     }
 
     // Submit chat
     const handleChatSubmit = (e) => {
       if (e) e.preventDefault();
-      const text = chatInput.value.trim();
+      if (!this.dom.chatInput) return;
+      
+      const text = this.dom.chatInput.value.trim();
       if (!text) return;
 
       this.appendUserMessage(text);
-      chatInput.value = '';
+      this.dom.chatInput.value = '';
       this.showTypingIndicator();
 
       setTimeout(() => {
         this.removeTypingIndicator();
         const responsePkg = this.ai.processFanQuery(text, this.selectedLanguage, this.fanContext);
-        this.appendAIMessage(responsePkg.response);
+        this.appendAIMessage(responsePkg.response, responsePkg.inferenceContext);
         this.map.applyHighlight(responsePkg.highlightMap);
         this.renderSuggestions(responsePkg.suggestions);
       }, 800);
     };
 
-    if (chatForm) chatForm.addEventListener('submit', handleChatSubmit);
-    if (btnSend) btnSend.addEventListener('click', handleChatSubmit);
+    if (this.dom.chatForm) this.dom.chatForm.addEventListener('submit', handleChatSubmit);
+    if (this.dom.btnSend) this.dom.btnSend.addEventListener('click', handleChatSubmit);
 
-    // Mock Voice Assistance
-    if (voiceBtn) {
-      voiceBtn.addEventListener('click', () => {
+    // Mock Voice Assistance recording triggers
+    if (this.dom.voiceBtn) {
+      this.dom.voiceBtn.addEventListener('click', () => {
         this.appendSystemLog("Microphone activated. Listening...", "info");
-        voiceBtn.style.background = 'var(--color-danger)';
-        voiceBtn.innerHTML = '🎤 Listening...';
+        this.dom.voiceBtn.style.background = 'var(--color-danger)';
+        this.dom.voiceBtn.innerHTML = '🎤 Listening...';
         
         setTimeout(() => {
-          voiceBtn.style.background = '';
-          voiceBtn.innerHTML = '🎤 Mic';
+          if (this.dom.voiceBtn) {
+            this.dom.voiceBtn.style.background = '';
+            this.dom.voiceBtn.innerHTML = '🎤 Mic';
+          }
           
           let mockSpeech = "Where is wheelchair access?";
           if (this.selectedLanguage === 'es') mockSpeech = "¿Dónde hay acceso para silla de ruedas?";
           if (this.selectedLanguage === 'fr') mockSpeech = "Où est l'accès handicapé ?";
 
-          chatInput.value = mockSpeech;
+          if (this.dom.chatInput) this.dom.chatInput.value = mockSpeech;
           this.appendSystemLog("Voice recognized: " + mockSpeech, "success");
         }, 2000);
       });
@@ -142,6 +206,9 @@ class ArenaFlowUIManager {
     this.renderSuggestions(["Where is Section 118?", "Find vegan food", "Elevator locations"]);
   }
 
+  /**
+   * Configures operations triggers, incident selectors, and broadcasts.
+   */
   setupOperationsCenter() {
     const incidentSelect = document.getElementById('ops-incident-select');
     const btnTrigger = document.getElementById('ops-trigger-incident');
@@ -160,12 +227,13 @@ class ArenaFlowUIManager {
       });
     }
 
-    // Trigger custom incident reports
+    // Trigger custom reports (with strict HTML escaping)
     if (btnCustomTrigger && customReportInput) {
       btnCustomTrigger.addEventListener('click', () => {
-        const val = customReportInput.value.trim();
-        if (!val) return;
+        const rawVal = customReportInput.value.trim();
+        if (!rawVal) return;
 
+        const val = this.escapeHTML(rawVal);
         const customIncident = {
           id: "INC-" + Math.floor(Math.random() * 900 + 100),
           title: "Report: " + val.substring(0, 30) + "...",
@@ -180,7 +248,7 @@ class ArenaFlowUIManager {
       });
     }
 
-    // Broadcast announcement
+    // Broadcast announcements
     if (btnBroadcast) {
       btnBroadcast.addEventListener('click', () => {
         const activeTextEl = document.querySelector('.incident-broadcast-box p:not([style*="display: none"])');
@@ -188,19 +256,22 @@ class ArenaFlowUIManager {
         this.appendSystemLog(`[STADIUM BROADCAST]: "${text}"`, "critical");
         
         // Render globally in a visual alert box
-        const announceBanner = document.getElementById('global-announcement-banner');
-        if (announceBanner) {
-          announceBanner.style.display = 'block';
-          announceBanner.innerHTML = `<strong>⚠️ BROADCASTED:</strong> ${text}`;
+        if (this.dom.announceBanner) {
+          this.dom.announceBanner.style.display = 'block';
+          this.dom.announceBanner.textContent = `⚠️ BROADCASTED: ${text}`;
           
           setTimeout(() => {
-            announceBanner.style.display = 'none';
+            if (this.dom.announceBanner) this.dom.announceBanner.style.display = 'none';
           }, 8000);
         }
       });
     }
   }
 
+  /**
+   * Processes incident resolution logic, updates the map, and displays dispatches.
+   * @param {object} incident - Incident information structure.
+   */
   processIncidentResolution(incident) {
     this.appendSystemLog(`AI Incident Command engaged for ${incident.id}: ${incident.title}`, "warning");
     
@@ -214,8 +285,6 @@ class ArenaFlowUIManager {
       GATES_DATA['Gate A'].status = 'Critical';
       GATES_DATA['Gate B'].crowdLevel = 75; // Traffic shifts
       this.map.init();
-      
-      // Highlight redirected path
       this.map.applyHighlight({ type: 'route', from: 'Gate A', to: 'Section 118', accessible: false });
     } else if (incident.id === 'INC-102') { // Elevator outage
       this.map.applyHighlight({ type: 'route', from: 'Gate D', to: 'Section 202', accessible: true });
@@ -224,59 +293,59 @@ class ArenaFlowUIManager {
       this.appendSystemLog("Directing canopy closure (Est: 12 minutes).", "info");
     }
 
-    // Render Chain of Thought
-    const cotBox = document.getElementById('cot-reasoning');
-    if (cotBox) {
-      cotBox.innerHTML = `<h5>🧠 AI Reasoning (Chain-of-Thought)</h5>
-                          <pre style="white-space: pre-wrap; font-family: var(--font-body); font-size: 0.85rem; color: var(--color-brand-primary); margin-top: 8px;">${resolution.chainOfThought}</pre>`;
+    // Render Chain of Thought (escaped variables)
+    if (this.dom.cotBox) {
+      this.dom.cotBox.innerHTML = `<h5>🧠 AI Reasoning (Chain-of-Thought)</h5>
+                                   <pre style="white-space: pre-wrap; font-family: var(--font-body); font-size: 0.85rem; color: var(--color-brand-primary); margin-top: 8px;">${this.escapeHTML(resolution.chainOfThought)}</pre>`;
     }
 
     // Render SOP Checklist
-    const sopBox = document.getElementById('sop-tasks');
-    if (sopBox) {
-      sopBox.innerHTML = resolution.actionPlan.map(task => `
+    if (this.dom.sopBox) {
+      this.dom.sopBox.innerHTML = resolution.actionPlan.map(task => `
         <li class="incident-sop-item">
           <span class="incident-sop-check">⚡</span>
-          <span>${task}</span>
+          <span>${this.escapeHTML(task)}</span>
         </li>
       `).join('');
     }
 
-    // Render Dispatches
-    const dispatchBox = document.getElementById('dispatch-list');
-    if (dispatchBox) {
-      dispatchBox.innerHTML = resolution.dispatches.map((d, index) => `
+    // Render Dispatches with XSS escaping
+    if (this.dom.dispatchBox) {
+      this.dom.dispatchBox.innerHTML = resolution.dispatches.map((d, index) => `
         <div class="log-item log-${d.priority === 'Critical' ? 'critical' : d.priority === 'High' ? 'warning' : 'info'}" id="dispatch-item-${index}">
           <div>
-            <strong>${d.team} (${d.unit})</strong> @ ${d.location}<br/>
-            <span style="font-size: 0.8rem; color: var(--color-text-secondary);">${d.task}</span>
+            <strong>${this.escapeHTML(d.team)} (${this.escapeHTML(d.unit)})</strong> @ ${this.escapeHTML(d.location)}<br/>
+            <span style="font-size: 0.8rem; color: var(--color-text-secondary);">${this.escapeHTML(d.task)}</span>
           </div>
           <div style="display: flex; flex-direction: column; align-items: flex-end;">
-            <span class="status-badge" style="background: rgba(255, 82, 82, 0.1); border-color: rgba(255, 82, 82, 0.3); color: var(--color-danger);">${d.priority}</span>
-            <button class="btn btn-secondary" style="font-size: 0.65rem; padding: 2px 6px; margin-top: 4px;" onclick="window.ui.resolveDispatch('${incident.id}', ${index})">Resolve</button>
+            <span class="status-badge" style="background: rgba(255, 82, 82, 0.1); border-color: rgba(255, 82, 82, 0.3); color: var(--color-danger);">${this.escapeHTML(d.priority)}</span>
+            <button class="btn btn-secondary" style="font-size: 0.65rem; padding: 2px 6px; margin-top: 4px;" onclick="window.ui.resolveDispatch('${this.escapeHTML(incident.id)}', ${index})">Resolve</button>
           </div>
         </div>
       `).join('');
     }
 
     // Render Translations Tabs
-    const translationBox = document.getElementById('broadcast-translations');
-    if (translationBox) {
-      translationBox.innerHTML = `
+    if (this.dom.translationBox) {
+      this.dom.translationBox.innerHTML = `
         <div class="localization-tabs">
           <button class="loc-tab active" onclick="window.ui.switchBroadcastLang('en')">EN</button>
           <button class="loc-tab" onclick="window.ui.switchBroadcastLang('es')">ES</button>
           <button class="loc-tab" onclick="window.ui.switchBroadcastLang('fr')">FR</button>
         </div>
         <div class="incident-broadcast-box" style="background: rgba(255, 255, 255, 0.05); padding: var(--spacing-sm); border-radius: var(--radius-sm);">
-          <p id="broadcast-txt-en" style="margin: 0; font-size: 0.9rem;">${resolution.broadcasts.en}</p>
-          <p id="broadcast-txt-es" style="margin: 0; font-size: 0.9rem; display: none;">${resolution.broadcasts.es}</p>
-          <p id="broadcast-txt-fr" style="margin: 0; font-size: 0.9rem; display: none;">${resolution.broadcasts.fr}</p>
+          <p id="broadcast-txt-en" style="margin: 0; font-size: 0.9rem;">${this.escapeHTML(resolution.broadcasts.en)}</p>
+          <p id="broadcast-txt-es" style="margin: 0; font-size: 0.9rem; display: none;">${this.escapeHTML(resolution.broadcasts.es)}</p>
+          <p id="broadcast-txt-fr" style="margin: 0; font-size: 0.9rem; display: none;">${this.escapeHTML(resolution.broadcasts.fr)}</p>
         </div>
       `;
     }
   }
 
+  /**
+   * Toggles active broadcast message preview language.
+   * @param {string} lang - Language code.
+   */
   switchBroadcastLang(lang) {
     const tabs = document.querySelectorAll('.loc-tab');
     tabs.forEach(tab => {
@@ -289,40 +358,41 @@ class ArenaFlowUIManager {
     });
   }
 
+  /**
+   * Configures contrast settings and text sizes.
+   */
   setupAccessibilitySettings() {
-    const btnContrast = document.getElementById('btn-contrast-toggle');
-    const btnTextSize = document.getElementById('btn-text-size');
-
-    if (btnContrast) {
-      btnContrast.addEventListener('click', () => {
+    if (this.dom.contrastBtn) {
+      this.dom.contrastBtn.addEventListener('click', () => {
         document.body.classList.toggle('high-contrast');
         const active = document.body.classList.contains('high-contrast');
-        btnContrast.style.border = active ? '2px solid var(--color-brand-primary)' : '';
+        this.dom.contrastBtn.style.border = active ? '2px solid var(--color-brand-primary)' : '';
         this.appendSystemLog(`High Contrast Mode: ${active ? 'ON' : 'OFF'}`, "info");
       });
     }
 
-    if (btnTextSize) {
-      btnTextSize.addEventListener('click', () => {
-        let size = document.body.style.fontSize;
+    if (this.dom.textSizeBtn) {
+      this.dom.textSizeBtn.addEventListener('click', () => {
+        const size = document.body.style.fontSize;
         if (!size || size === '100%') {
           document.body.style.fontSize = '115%';
-          btnTextSize.textContent = 'Text: Large';
+          this.dom.textSizeBtn.textContent = 'Text: Large';
         } else if (size === '115%') {
           document.body.style.fontSize = '130%';
-          btnTextSize.textContent = 'Text: Extra Large';
+          this.dom.textSizeBtn.textContent = 'Text: Extra Large';
         } else {
           document.body.style.fontSize = '100%';
-          btnTextSize.textContent = 'Text: Standard';
+          this.dom.textSizeBtn.textContent = 'Text: Standard';
         }
       });
     }
   }
 
+  /**
+   * Triggers background telemetry cycles.
+   */
   startTelemetrySimulation() {
-    // Updates values every 5 seconds to show a responsive stadium system
     setInterval(() => {
-      // Solar variation based on time
       const hour = new Date().getHours();
       let sunMultiplier = 1.0;
       if (hour < 6 || hour > 19) sunMultiplier = 0.05;
@@ -332,7 +402,6 @@ class ArenaFlowUIManager {
       this.telemetry.waterSaved += Math.floor(Math.random() * 5 + 2);
       this.telemetry.energySaved += Math.floor(Math.random() * 4 + 1);
       
-      // Gate fluctuations
       Object.keys(GATES_DATA).forEach(g => {
         const drift = Math.floor(Math.random() * 7 - 3);
         GATES_DATA[g].crowdLevel = Math.max(10, Math.min(99, GATES_DATA[g].crowdLevel + drift));
@@ -344,46 +413,42 @@ class ArenaFlowUIManager {
     }, 5000);
   }
 
+  /**
+   * Refreshes the sustainability widget layout.
+   */
   renderSustainability() {
-    // Render Telemetry parameters
-    const txtSolar = document.getElementById('telemetry-solar');
-    const txtWater = document.getElementById('telemetry-water');
-    const txtEnergy = document.getElementById('telemetry-energy');
-    const barWaste = document.getElementById('bar-waste-diversion');
-    const txtWasteVal = document.getElementById('waste-value-text');
-
-    if (txtSolar) txtSolar.textContent = this.telemetry.solarGeneration + " kW";
-    if (txtWater) txtWater.textContent = this.telemetry.waterSaved.toLocaleString() + " Gallons";
-    if (txtEnergy) txtEnergy.textContent = this.telemetry.energySaved.toLocaleString() + " kWh";
+    if (this.dom.solarText) this.dom.solarText.textContent = this.telemetry.solarGeneration + " kW";
+    if (this.dom.waterText) this.dom.waterText.textContent = this.telemetry.waterSaved.toLocaleString() + " Gallons";
+    if (this.dom.energyText) this.dom.energyText.textContent = this.telemetry.energySaved.toLocaleString() + " kWh";
     
-    if (barWaste) barWaste.style.width = this.telemetry.wasteDiverted + "%";
-    if (txtWasteVal) txtWasteVal.textContent = this.telemetry.wasteDiverted + "%";
+    if (this.dom.wasteBar) this.dom.wasteBar.style.width = this.telemetry.wasteDiverted + "%";
+    if (this.dom.wasteText) this.dom.wasteText.textContent = this.telemetry.wasteDiverted + "%";
 
-    // Re-generate AI recommendations
-    const recsList = document.getElementById('sustainability-tips');
-    if (recsList) {
+    if (this.dom.sustainabilityTips) {
       const recs = this.ai.generateSustainabilityRecommendations(this.telemetry);
-      recsList.innerHTML = recs.map(r => `
+      this.dom.sustainabilityTips.innerHTML = recs.map(r => `
         <div style="background: rgba(0, 230, 118, 0.04); border: 1px solid rgba(0, 230, 118, 0.15); padding: var(--spacing-sm) var(--spacing-md); border-radius: var(--radius-sm); margin-bottom: var(--spacing-xs);">
-          <strong style="color: var(--color-success); font-size: 0.85rem;">🌱 ${r.title}</strong>
-          <p style="font-size: 0.75rem; margin-top: 2px; color: var(--color-text-secondary);">${r.description}</p>
-          <span style="font-size: 0.7rem; color: var(--color-text-muted); font-style: italic;">Potential Savings: ${r.savings}</span>
+          <strong style="color: var(--color-success); font-size: 0.85rem;">🌱 ${this.escapeHTML(r.title)}</strong>
+          <p style="font-size: 0.75rem; margin-top: 2px; color: var(--color-text-secondary);">${this.escapeHTML(r.description)}</p>
+          <span style="font-size: 0.7rem; color: var(--color-text-muted); font-style: italic;">Potential Savings: ${this.escapeHTML(r.savings)}</span>
         </div>
       `).join('');
     }
   }
 
+  /**
+   * Updates gate scanned speeds and crowd levels.
+   */
   updateOperationsTicker() {
-    const list = document.getElementById('gates-list');
-    if (!list) return;
+    if (!this.dom.gatesList) return;
 
-    list.innerHTML = Object.keys(GATES_DATA).map(name => {
+    this.dom.gatesList.innerHTML = Object.keys(GATES_DATA).map(name => {
       const gate = GATES_DATA[name];
       const barColor = gate.crowdLevel > 80 ? 'fill-danger' : gate.crowdLevel > 50 ? 'fill-warning' : 'fill-primary';
       return `
         <div class="progress-container" style="background: rgba(255, 255, 255, 0.02); padding: var(--spacing-sm); border-radius: var(--radius-sm); margin-bottom: var(--spacing-xs);">
           <div class="progress-label-row">
-            <span><strong>${name}</strong> (${gate.access})</span>
+            <span><strong>${this.escapeHTML(name)}</strong> (${this.escapeHTML(gate.access)})</span>
             <span>${gate.crowdLevel}% density (${gate.scanRate} scans/min)</span>
           </div>
           <div class="progress-bar-bg">
@@ -394,27 +459,32 @@ class ArenaFlowUIManager {
     }).join('');
   }
 
+  /**
+   * Populates chatbot suggestions panel.
+   */
   renderSuggestions(suggestions) {
-    const suggestionsBox = document.getElementById('chat-suggestions');
-    if (!suggestionsBox) return;
+    if (!this.dom.suggestionsBox) return;
 
-    suggestionsBox.innerHTML = suggestions.map(s => `
-      <button class="btn btn-secondary" style="font-size: 0.8rem; padding: 4px 10px;" onclick="window.ui.handleSuggestionClick('${s.replace(/'/g, "\\'")}')">${s}</button>
+    this.dom.suggestionsBox.innerHTML = suggestions.map(s => `
+      <button class="btn btn-secondary" style="font-size: 0.8rem; padding: 4px 10px;" onclick="window.ui.handleSuggestionClick('${this.escapeHTML(s.replace(/'/g, "\\'"))}')">${this.escapeHTML(s)}</button>
     `).join('');
   }
 
+  /**
+   * Handles user clicks on suggestion buttons.
+   */
   handleSuggestionClick(text) {
-    const chatInput = document.getElementById('chat-input');
-    if (chatInput) {
-      chatInput.value = text;
-      // Trigger submission
-      const btnSend = document.getElementById('btn-send');
-      if (btnSend) btnSend.click();
+    if (this.dom.chatInput) {
+      this.dom.chatInput.value = text;
+      if (this.dom.btnSend) this.dom.btnSend.click();
     }
   }
 
+  /**
+   * Appends user queries securely using textContent.
+   */
   appendUserMessage(text) {
-    const container = document.getElementById('chat-box-messages');
+    const container = this.dom.chatMessages;
     if (!container) return;
 
     const div = document.createElement('div');
@@ -424,19 +494,55 @@ class ArenaFlowUIManager {
     container.scrollTop = container.scrollHeight;
   }
 
-  appendAIMessage(text) {
-    const container = document.getElementById('chat-box-messages');
+  /**
+   * Appends AI replies securely and displays contextual metadata tags.
+   */
+  appendAIMessage(text, inferenceContext = null) {
+    const container = this.dom.chatMessages;
     if (!container) return;
 
-    const div = document.createElement('div');
-    div.className = 'chat-message message-ai';
-    div.textContent = text;
-    container.appendChild(div);
+    const messageDiv = document.createElement('div');
+    messageDiv.className = 'chat-message message-ai';
+    
+    // Set text safely via textContent
+    const textSpan = document.createElement('span');
+    textSpan.textContent = text;
+    messageDiv.appendChild(textSpan);
+
+    // Context metadata tags for problem statement alignment
+    if (inferenceContext) {
+      const metaDiv = document.createElement('div');
+      metaDiv.style.fontSize = '0.7rem';
+      metaDiv.style.marginTop = '6px';
+      metaDiv.style.color = 'var(--color-brand-primary)';
+      metaDiv.style.display = 'flex';
+      metaDiv.style.gap = '8px';
+      metaDiv.style.flexWrap = 'wrap';
+
+      const langTag = document.createElement('span');
+      langTag.textContent = `🌐 Lang: ${this.selectedLanguage.toUpperCase()}`;
+      metaDiv.appendChild(langTag);
+
+      const sectionTag = document.createElement('span');
+      sectionTag.textContent = `📍 Section: ${inferenceContext.ticketSection}`;
+      metaDiv.appendChild(sectionTag);
+
+      const accessTag = document.createElement('span');
+      accessTag.textContent = `♿ Step-free: ${inferenceContext.accessibilityNeeded ? 'Yes' : 'No'}`;
+      metaDiv.appendChild(accessTag);
+
+      messageDiv.appendChild(metaDiv);
+    }
+
+    container.appendChild(messageDiv);
     container.scrollTop = container.scrollHeight;
   }
 
+  /**
+   * Renders typing indicators.
+   */
   showTypingIndicator() {
-    const container = document.getElementById('chat-box-messages');
+    const container = this.dom.chatMessages;
     if (!container) return;
 
     const div = document.createElement('div');
@@ -447,27 +553,43 @@ class ArenaFlowUIManager {
     container.scrollTop = container.scrollHeight;
   }
 
+  /**
+   * Removes active typing indicators.
+   */
   removeTypingIndicator() {
     const indicator = document.getElementById('chat-typing-indicator');
     if (indicator) indicator.remove();
   }
 
+  /**
+   * Logs system audits securely with time stamp.
+   */
   appendSystemLog(text, severity = 'info') {
-    const logBox = document.getElementById('ops-system-logs');
+    const logBox = this.dom.opsLogs;
     if (!logBox) return;
 
     const timestamp = new Date().toLocaleTimeString();
     const div = document.createElement('div');
     div.className = `log-item log-${severity} animate-slide-down`;
-    div.innerHTML = `
-      <span><strong>[${timestamp}]</strong> ${text}</span>
-      <span style="font-size: 0.75rem; text-transform: uppercase; opacity: 0.8;">${severity}</span>
-    `;
+    
+    const contentSpan = document.createElement('span');
+    contentSpan.innerHTML = `<strong>[${timestamp}]</strong> ${this.escapeHTML(text)}`;
+    div.appendChild(contentSpan);
+
+    const severitySpan = document.createElement('span');
+    severitySpan.style.fontSize = '0.75rem';
+    severitySpan.style.textTransform = 'uppercase';
+    severitySpan.style.opacity = '0.8';
+    severitySpan.textContent = severity;
+    div.appendChild(severitySpan);
+
     logBox.insertBefore(div, logBox.firstChild);
   }
 
   /**
    * Simulates resolving an active dispatch ticket, updating telemetry metrics back to optimal.
+   * @param {string} incidentId - Logged incident ID.
+   * @param {number} index - Index of element inside dispatches list.
    */
   resolveDispatch(incidentId, index) {
     const el = document.getElementById(`dispatch-item-${index}`);
@@ -505,6 +627,7 @@ class ArenaFlowUIManager {
 
   /**
    * Logs a user-initiated Eco-Action and updates CO2 offsets and badge levels.
+   * @param {string} actionId - Target Eco Action ID.
    */
   handleEcoActionLog(actionId) {
     this.appendUserMessage(`Sustainability log: Submitting action ${actionId}...`);
@@ -529,6 +652,7 @@ class ArenaFlowUIManager {
 
   /**
    * Recommends food options and highlights routes on the map.
+   * @param {string} preference - Dietary preference.
    */
   handleFoodFinderSelection(preference) {
     this.appendUserMessage(`Food Finder: Looking for ${preference} options...`);

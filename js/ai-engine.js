@@ -1,3 +1,5 @@
+'use strict';
+
 /* ArenaFlow GenAI Simulation & Reasoning Engine */
 
 class ArenaFlowAIEngine {
@@ -108,7 +110,12 @@ class ArenaFlowAIEngine {
       response: textResponse,
       highlightMap,
       suggestions,
-      language: this.currentLanguage
+      language: this.currentLanguage,
+      inferenceContext: {
+        ticketSection: ticketSec,
+        currentGate: currentGate,
+        accessibilityNeeded: isAccessible
+      }
     };
   }
 

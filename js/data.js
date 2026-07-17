@@ -1,3 +1,5 @@
+'use strict';
+
 /* Static Data & State Definitions */
 
 const STADIUM_NAME = "MetLife Arena (New York/New Jersey)";
@@ -155,6 +157,13 @@ const ECO_REWARDS_DATA = [
   { co2Limit: 0.3, badge: "Carbon Warrior", reward: "Digital Player Card & 10% Merch Code: WARRIOR10" },
   { co2Limit: 1.0, badge: "Eco MVP Champion", reward: "Matchday Certificate & 20% Food/Drink Code: MVPECO20" }
 ];
+
+Object.freeze(CONCESSIONS_DATA);
+Object.freeze(RESTROOMS_DATA);
+Object.freeze(PRESET_INCIDENTS);
+Object.freeze(MULTILINGUAL_DATABASE);
+Object.freeze(ECO_CHALLENGES_DATA);
+Object.freeze(ECO_REWARDS_DATA);
 
 // Export definitions for browser loading or module usage
 if (typeof module !== 'undefined' && module.exports) {
