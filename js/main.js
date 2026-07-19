@@ -1,3 +1,5 @@
+'use strict';
+
 /* App entry point and bootstrapping */
 
 document.addEventListener('DOMContentLoaded', () => {

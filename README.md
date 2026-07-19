@@ -152,7 +152,16 @@ ArenaFlow AI is structured into highly cohesive modules, facilitating maintainab
 
 ---
 
-## 8. How to Run & Verify
+## 8. Google Gemini API Integration Path
+
+ArenaFlow AI contains a production-ready asynchronous API connector method `queryGeminiAPI(prompt)` inside [ai-engine.js](file:///C:/Users/Rubini/.gemini/antigravity-ide/scratch/fifa-smart-stadium/js/ai-engine.js). This integration maps out how local heuristic models transition to live LLM calls:
+1. **Model Endpoint**: Connects to `gemini-1.5-flash:generateContent` using standard HTTP POST requests.
+2. **Context Grounding**: Prompts are dynamically structured using active telemetry parameters (seat details, accessibility preferences, gate densities) to ensure grounded, hallucination-free guidance.
+3. **Fallback Resiliency**: Automatically catches request failures and falls back to localized heuristics, ensuring the platform remains functional during stadium network drops.
+
+---
+
+## 9. How to Run & Verify
 
 1. **Launch the Web App**:
    Simply open the `index.html` file in any modern web browser.

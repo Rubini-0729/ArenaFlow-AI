@@ -202,6 +202,35 @@ class ArenaFlowUIManager {
       });
     }
 
+    // Bind Concession Food Finder buttons via event listeners
+    const foodBtns = document.querySelectorAll('.food-finder-btn');
+    foodBtns.forEach(btn => {
+      btn.addEventListener('click', () => {
+        const pref = btn.getAttribute('data-pref');
+        this.handleFoodFinderSelection(pref);
+      });
+    });
+
+    // Bind Sustainability Eco-Challenge buttons via event listeners
+    const ecoBtns = document.querySelectorAll('.eco-log-btn');
+    ecoBtns.forEach(btn => {
+      btn.addEventListener('click', () => {
+        const ecoId = btn.getAttribute('data-eco-id');
+        this.handleEcoActionLog(ecoId);
+      });
+    });
+
+    // Event delegation for chatbot suggestion buttons click handlers
+    if (this.dom.suggestionsBox) {
+      this.dom.suggestionsBox.addEventListener('click', (e) => {
+        const btn = e.target.closest('.suggestion-btn');
+        if (btn) {
+          const text = btn.getAttribute('data-suggestion');
+          this.handleSuggestionClick(text);
+        }
+      });
+    }
+
     // Initialize suggestions
     this.renderSuggestions(["Where is Section 118?", "Find vegan food", "Elevator locations"]);
   }
@@ -266,6 +295,29 @@ class ArenaFlowUIManager {
         }
       });
     }
+
+    // Event delegation for Active Staff Dispatches "Resolve" buttons
+    if (this.dom.dispatchBox) {
+      this.dom.dispatchBox.addEventListener('click', (e) => {
+        const resolveBtn = e.target.closest('.resolve-dispatch-btn');
+        if (resolveBtn) {
+          const incId = resolveBtn.getAttribute('data-incident-id');
+          const idx = parseInt(resolveBtn.getAttribute('data-dispatch-idx'), 10);
+          this.resolveDispatch(incId, idx);
+        }
+      });
+    }
+
+    // Event delegation for Multilingual Broadcast Translation Tabs
+    if (this.dom.translationBox) {
+      this.dom.translationBox.addEventListener('click', (e) => {
+        const tab = e.target.closest('.loc-tab');
+        if (tab) {
+          const lang = tab.getAttribute('data-lang');
+          this.switchBroadcastLang(lang);
+        }
+      });
+    }
   }
 
   /**
@@ -309,7 +361,7 @@ class ArenaFlowUIManager {
       `).join('');
     }
 
-    // Render Dispatches with XSS escaping
+    // Render Dispatches with data-attributes for event delegation
     if (this.dom.dispatchBox) {
       this.dom.dispatchBox.innerHTML = resolution.dispatches.map((d, index) => `
         <div class="log-item log-${d.priority === 'Critical' ? 'critical' : d.priority === 'High' ? 'warning' : 'info'}" id="dispatch-item-${index}">
@@ -319,19 +371,19 @@ class ArenaFlowUIManager {
           </div>
           <div style="display: flex; flex-direction: column; align-items: flex-end;">
             <span class="status-badge" style="background: rgba(255, 82, 82, 0.1); border-color: rgba(255, 82, 82, 0.3); color: var(--color-danger);">${this.escapeHTML(d.priority)}</span>
-            <button class="btn btn-secondary" style="font-size: 0.65rem; padding: 2px 6px; margin-top: 4px;" onclick="window.ui.resolveDispatch('${this.escapeHTML(incident.id)}', ${index})">Resolve</button>
+            <button class="btn btn-secondary resolve-dispatch-btn" style="font-size: 0.65rem; padding: 2px 6px; margin-top: 4px;" data-incident-id="${this.escapeHTML(incident.id)}" data-dispatch-idx="${index}">Resolve</button>
           </div>
         </div>
       `).join('');
     }
 
-    // Render Translations Tabs
+    // Render Translations Tabs with data-attributes for event delegation
     if (this.dom.translationBox) {
       this.dom.translationBox.innerHTML = `
         <div class="localization-tabs">
-          <button class="loc-tab active" onclick="window.ui.switchBroadcastLang('en')">EN</button>
-          <button class="loc-tab" onclick="window.ui.switchBroadcastLang('es')">ES</button>
-          <button class="loc-tab" onclick="window.ui.switchBroadcastLang('fr')">FR</button>
+          <button class="loc-tab active" data-lang="en">EN</button>
+          <button class="loc-tab" data-lang="es">ES</button>
+          <button class="loc-tab" data-lang="fr">FR</button>
         </div>
         <div class="incident-broadcast-box" style="background: rgba(255, 255, 255, 0.05); padding: var(--spacing-sm); border-radius: var(--radius-sm);">
           <p id="broadcast-txt-en" style="margin: 0; font-size: 0.9rem;">${this.escapeHTML(resolution.broadcasts.en)}</p>
@@ -349,7 +401,7 @@ class ArenaFlowUIManager {
   switchBroadcastLang(lang) {
     const tabs = document.querySelectorAll('.loc-tab');
     tabs.forEach(tab => {
-      tab.classList.toggle('active', tab.textContent.toLowerCase() === lang);
+      tab.classList.toggle('active', tab.getAttribute('data-lang') === lang);
     });
 
     ['en', 'es', 'fr'].forEach(l => {
@@ -466,7 +518,7 @@ class ArenaFlowUIManager {
     if (!this.dom.suggestionsBox) return;
 
     this.dom.suggestionsBox.innerHTML = suggestions.map(s => `
-      <button class="btn btn-secondary" style="font-size: 0.8rem; padding: 4px 10px;" onclick="window.ui.handleSuggestionClick('${this.escapeHTML(s.replace(/'/g, "\\'"))}')">${this.escapeHTML(s)}</button>
+      <button class="btn btn-secondary suggestion-btn" style="font-size: 0.8rem; padding: 4px 10px;" data-suggestion="${this.escapeHTML(s)}">${this.escapeHTML(s)}</button>
     `).join('');
   }
 

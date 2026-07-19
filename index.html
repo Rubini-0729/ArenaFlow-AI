@@ -321,9 +321,9 @@
                 GenAI analyzes queue times and distances to recommend the best concessions stand:
               </p>
               <div style="display: flex; gap: var(--spacing-sm);">
-                <button class="btn btn-secondary" style="flex: 1; font-size: 0.75rem;" onclick="window.ui.handleFoodFinderSelection('vegan')">🌱 Vegan Options</button>
-                <button class="btn btn-secondary" style="flex: 1; font-size: 0.75rem;" onclick="window.ui.handleFoodFinderSelection('halal')">🥙 Halal Cart</button>
-                <button class="btn btn-secondary" style="flex: 1; font-size: 0.75rem;" onclick="window.ui.handleFoodFinderSelection('burgers')">🍔 Burgers & Grill</button>
+                <button class="btn btn-secondary food-finder-btn" data-pref="vegan" style="flex: 1; font-size: 0.75rem;">🌱 Vegan Options</button>
+                <button class="btn btn-secondary food-finder-btn" data-pref="halal" style="flex: 1; font-size: 0.75rem;">🥙 Halal Cart</button>
+                <button class="btn btn-secondary food-finder-btn" data-pref="burgers" style="flex: 1; font-size: 0.75rem;">🍔 Burgers & Grill</button>
               </div>
             </div>
 
@@ -351,15 +351,15 @@
               <div style="display: flex; flex-direction: column; gap: var(--spacing-xs);">
                 <div style="display: flex; justify-content: space-between; align-items: center; background: rgba(255,255,255,0.02); padding: var(--spacing-sm); border-radius: var(--radius-sm); border: 1px solid var(--color-border-glass);">
                   <span style="font-size: 0.8rem;">🥤 Recycle plastic bottles/cups</span>
-                  <button class="btn btn-primary" style="font-size: 0.7rem; padding: 2px 8px;" onclick="window.ui.handleEcoActionLog('eco-1')">Log Action</button>
+                  <button class="btn btn-primary eco-log-btn" data-eco-id="eco-1" style="font-size: 0.7rem; padding: 2px 8px;">Log Action</button>
                 </div>
                 <div style="display: flex; justify-content: space-between; align-items: center; background: rgba(255,255,255,0.02); padding: var(--spacing-sm); border-radius: var(--radius-sm); border: 1px solid var(--color-border-glass);">
                   <span style="font-size: 0.8rem;">🚆 Traveled via Express Train / Subway</span>
-                  <button class="btn btn-primary" style="font-size: 0.7rem; padding: 2px 8px;" onclick="window.ui.handleEcoActionLog('eco-2')">Log Action</button>
+                  <button class="btn btn-primary eco-log-btn" data-eco-id="eco-2" style="font-size: 0.7rem; padding: 2px 8px;">Log Action</button>
                 </div>
                 <div style="display: flex; justify-content: space-between; align-items: center; background: rgba(255,255,255,0.02); padding: var(--spacing-sm); border-radius: var(--radius-sm); border: 1px solid var(--color-border-glass);">
                   <span style="font-size: 0.8rem;">💧 Refilled reusable bottle at water station</span>
-                  <button class="btn btn-primary" style="font-size: 0.7rem; padding: 2px 8px;" onclick="window.ui.handleEcoActionLog('eco-4')">Log Action</button>
+                  <button class="btn btn-primary eco-log-btn" data-eco-id="eco-4" style="font-size: 0.7rem; padding: 2px 8px;">Log Action</button>
                 </div>
               </div>
             </div>

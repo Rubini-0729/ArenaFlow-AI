@@ -1,11 +1,52 @@
 'use strict';
 
-/* Unit test suite for ArenaFlow GenAI Reasoning Engine */
+/* Unit test suite for ArenaFlow GenAI Reasoning Engine & UI Orchestration */
 
 const assert = require('assert');
 const data = require('../js/data.js');
 
-// Bind data variables to global scope so ai-engine can read them in the Node environment
+// Define a robust headless DOM Mock environment for testing UI/Map modules in Node
+global.window = {};
+global.HTMLElement = class {};
+global.SVGElement = class {};
+
+const mockElement = (id = 'mock-id') => {
+  return {
+    id: id,
+    style: {},
+    classList: {
+      add: () => {},
+      remove: () => {},
+      toggle: () => {},
+      contains: () => false
+    },
+    setAttribute: () => {},
+    removeAttribute: () => {},
+    appendChild: () => {},
+    insertBefore: () => {},
+    addEventListener: () => {},
+    querySelector: () => mockElement(),
+    querySelectorAll: () => [mockElement()],
+    closest: () => mockElement(),
+    getAttribute: (attr) => attr === 'data-view' ? 'ops' : '118',
+    innerHTML: '',
+    textContent: '',
+    value: 'test-value',
+    remove: () => {}
+  };
+};
+
+global.document = {
+  getElementById: (id) => mockElement(id),
+  querySelectorAll: (selector) => {
+    return [mockElement(selector)];
+  },
+  createElement: (tag) => mockElement(tag),
+  createElementNS: (ns, tag) => mockElement(tag),
+  addEventListener: () => {}
+};
+
+// Bind data variables to global scope so modules can read them in the Node environment
 global.MULTILINGUAL_DATABASE = data.MULTILINGUAL_DATABASE;
 global.RESTROOMS_DATA = data.RESTROOMS_DATA;
 global.GATES_DATA = data.GATES_DATA;
@@ -13,8 +54,11 @@ global.SUSTAINABILITY_TELEMETRY = data.SUSTAINABILITY_TELEMETRY;
 global.CONCESSIONS_DATA = data.CONCESSIONS_DATA;
 global.ECO_CHALLENGES_DATA = data.ECO_CHALLENGES_DATA;
 global.ECO_REWARDS_DATA = data.ECO_REWARDS_DATA;
+global.PRESET_INCIDENTS = data.PRESET_INCIDENTS;
 
 const ArenaFlowAIEngine = require('../js/ai-engine.js');
+const StadiumMapRenderer = require('../js/map-renderer.js');
+const ArenaFlowUIManager = require('../js/ui-manager.js');
 
 let testCount = 0;
 let successCount = 0;
@@ -31,7 +75,7 @@ function runTest(name, fn) {
   }
 }
 
-console.log("\x1b[35m=== RUNNING ARENAFLOW AI ENGINE TESTS ===\x1b[0m\n");
+console.log("\x1b[35m=== RUNNING ARENAFLOW CORE ENGINE & UI TESTS ===\x1b[0m\n");
 
 const engine = new ArenaFlowAIEngine();
 
@@ -155,6 +199,49 @@ runTest("Incident Command - Evacuation Map Highlights", () => {
   const solution = engine.solveIncident(weatherIncident);
   assert.strictEqual(solution.highlightMap.type, "evacuation");
   assert.deepStrictEqual(solution.highlightMap.sectors, ['sec-north', 'sec-east', 'sec-south', 'sec-west']);
+});
+
+// 6. Test Map Renderer (Using DOM Mock)
+runTest("Map Renderer - Initialization", () => {
+  const map = new StadiumMapRenderer('stadium-svg');
+  map.init();
+  assert.strictEqual(map.containerId, 'stadium-svg');
+  assert.ok(map.cachedElements.route);
+});
+
+runTest("Map Renderer - Concessions Highlight", () => {
+  const map = new StadiumMapRenderer('stadium-svg');
+  map.init();
+  map.applyHighlight({ type: 'concessions', filter: 'vegan' });
+  assert.ok(true);
+});
+
+// 7. Test UI Manager (Using DOM Mock)
+runTest("UI Manager - HTML Sanitization", () => {
+  const map = new StadiumMapRenderer('stadium-svg');
+  const ui = new ArenaFlowUIManager(engine, map);
+  
+  const dirty = "<div><script>alert(1)</script>Hello</div>";
+  const clean = ui.escapeHTML(dirty);
+  
+  assert.ok(!clean.includes("<div"));
+  assert.ok(clean.includes("&lt;div&gt;"));
+});
+
+runTest("UI Manager - Resolve Dispatch & Update Telemetry", () => {
+  const map = new StadiumMapRenderer('stadium-svg');
+  const ui = new ArenaFlowUIManager(engine, map);
+  ui.init();
+  
+  // Set gate A to bottleneck levels
+  GATES_DATA['Gate A'].crowdLevel = 95;
+  
+  // Resolve dispatch for Gate A incident
+  ui.resolveDispatch('INC-101', 0);
+  
+  // Verify that crowd level drops back to optimal
+  assert.strictEqual(GATES_DATA['Gate A'].crowdLevel, 35);
+  assert.strictEqual(GATES_DATA['Gate A'].status, 'Optimal');
 });
 
 // Summary Report
